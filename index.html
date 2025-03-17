@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Texas Hold'em Poker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #2e8b57;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+    h1, h2 {
+      margin: 10px;
+    }
+    .card {
+      display: inline-block;
+      border: 1px solid #fff;
+      border-radius: 8px;
+      width: 60px;
+      height: 90px;
+      line-height: 90px;
+      margin: 5px;
+      font-size: 24px;
+      background: #fff;
+      color: #000;
+    }
+    .card.red {
+      color: red;
+    }
+    .player {
+      border: 1px solid #fff;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+    }
+    .bot-hand {
+      font-style: italic;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #action-buttons {
+      margin-top: 20px;
+    }
+    #game-info {
+      margin-bottom: 20px;
+    }
+    /* Question mark icon in top right */
+    #help-icon {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    /* Help modal styling */
+    #help-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #444;
+      padding: 20px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      z-index: 1001;
+      max-height: 80%;
+      overflow-y: auto;
+      text-align: left;
+      width: 90%;
+      max-width: 600px;
+    }
+    #help-modal h3 {
+      margin-top: 0;
+    }
+    #modal-close {
+      cursor: pointer;
+      font-weight: bold;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+    }
+    /* Modal overlay */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      top:0;
+      left:0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+    }
+    /* Hand examples styling */
+    #hand-examples {
+      margin-top: 20px;
+    }
+    .hand-row {
+      margin-bottom: 8px;
+    }
+    .hand-row strong {
+      display: inline-block;
+      width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Help Icon -->
+  <div id="help-icon">❓</div>
+  
+  <!-- Modal Overlay -->
+  <div id="modal-overlay"></div>
+  
+  <!-- Help Modal -->
+  <div id="help-modal">
+    <div id="modal-close">X</div>
+    <h3>Poker Hand Rankings</h3>
+    <ol>
+      <li>Royal Flush</li>
+      <li>Straight Flush</li>
+      <li>Four of a Kind</li>
+      <li>Full House</li>
+      <li>Flush</li>
+      <li>Straight</li>
+      <li>Three of a Kind</li>
+      <li>Two Pair</li>
+      <li>One Pair</li>
+      <li>High Card</li>
+    </ol>
+    <!-- Example Poker Hands Section -->
+    <div id="hand-examples">
+      <h4>Example Hands</h4>
+      <div class="hand-row">
+        <strong>Royal Flush:</strong>
+        <div class="card">10♠</div>
+        <div class="card">J♠</div>
+        <div class="card">Q♠</div>
+        <div class="card">K♠</div>
+        <div class="card">A♠</div>
+      </div>
+      <div class="hand-row">
+        <strong>Straight Flush:</strong>
+        <div class="card">9♥</div>
+        <div class="card">8♥</div>
+        <div class="card">7♥</div>
+        <div class="card">6♥</div>
+        <div class="card">5♥</div>
+      </div>
+      <div class="hand-row">
+        <strong>Four of a Kind:</strong>
+        <div class="card">A♣</div>
+        <div class="card">A♦</div>
+        <div class="card">A♥</div>
+        <div class="card">A♠</div>
+        <div class="card">9♣</div>
+      </div>
+      <div class="hand-row">
+        <strong>Full House:</strong>
+        <div class="card">K♠</div>
+        <div class="card">K♦</div>
+        <div class="card">K♥</div>
+        <div class="card">3♣</div>
+        <div class="card">3♥</div>
+      </div>
+      <div class="hand-row">
+        <strong>Flush:</strong>
+        <div class="card">2♦</div>
+        <div class="card">5♦</div>
+        <div class="card">8♦</div>
+        <div class="card">J♦</div>
+        <div class="card">Q♦</div>
+      </div>
+      <div class="hand-row">
+        <strong>Straight:</strong>
+        <div class="card">4♣</div>
+        <div class="card">5♦</div>
+        <div class="card">6♥</div>
+        <div class="card">7♠</div>
+        <div class="card">8♣</div>
+      </div>
+      <div class="hand-row">
+        <strong>Three of a Kind:</strong>
+        <div class="card">Q♣</div>
+        <div class="card">Q♦</div>
+        <div class="card">Q♥</div>
+        <div class="card">2♠</div>
+        <div class="card">9♥</div>
+      </div>
+      <div class="hand-row">
+        <strong>Two Pair:</strong>
+        <div class="card">J♣</div>
+        <div class="card">J♦</div>
+        <div class="card">7♥</div>
+        <div class="card">7♠</div>
+        <div class="card">3♣</div>
+      </div>
+      <div class="hand-row">
+        <strong>One Pair:</strong>
+        <div class="card">10♣</div>
+        <div class="card">10♦</div>
+        <div class="card">4♠</div>
+        <div class="card">8♥</div>
+        <div class="card">K♣</div>
+      </div>
+      <div class="hand-row">
+        <strong>High Card:</strong>
+        <div class="card">A♣</div>
+        <div class="card">9♦</div>
+        <div class="card">7♥</div>
+        <div class="card">4♠</div>
+        <div class="card">2♦</div>
+      </div>
+    </div>
+  </div>
+  
+  <h1>Texas Hold'em Poker</h1>
+  <div id="game-info">
+    <span id="pot-info">Pot: 0</span> | 
+    <span id="bet-info">Current Bet: 0</span> | 
+    <span id="turn-info">Player Turn: </span>
+  </div>
+  
+  <!-- Community Cards Section -->
+  <h2 id="community-stage">Community Cards:</h2>
+  <div id="community-cards"></div>
+  
+  <h2>Players</h2>
+  <div id="players-area"></div>
+  
+  <div id="action-buttons">
+    <button id="fold-btn" disabled>Fold</button>
+    <button id="call-btn" disabled>Call</button>
+    <button id="raise-btn" disabled>Raise</button>
+    <button id="new-game-btn">New Game</button>
+  </div>
+  
+  <script>
+    // Card deck and game state
+    const suits = ['♠', '♥', '♦', '♣'];
+    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    let deck = [];
+    let players = [];
+    let communityCards = [];
+    let pot = 0;
+    let currentBet = 0;
+    let currentPlayerIndex = 0;
+    // Stages: flop, turn, river, showdown.
+    // We start at flop (with the initial 3 cards dealt).
+    let stage = 'flop';  
+    let bettingRoundActive = false;
+    let actionsThisRound = 0; // tracks number of actions in current betting round
+
+    // Create and shuffle deck
+    function createDeck() {
+      deck = [];
+      for (let suit of suits) {
+        for (let rank of ranks) {
+          deck.push({ rank, suit });
+        }
+      }
+    }
+    function shuffleDeck() {
+      for (let i = deck.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+    function dealCard() {
+      return deck.pop();
+    }
+    
+    // Create players if not already created.
+    // Players keep their chips from previous rounds (reset to 1000 if 0).
+    function createPlayers() {
+      if (players.length === 0) {
+        players = [
+          { name: "You", isBot: false, chips: 1000, hand: [], folded: false, currentBet: 0, isDealer: false },
+          { name: "Bot 1", isBot: true, chips: 1000, hand: [], folded: false, currentBet: 0, isDealer: false },
+          { name: "Bot 2", isBot: true, chips: 1000, hand: [], folded: false, currentBet: 0, isDealer: false },
+          { name: "Dealer Bot", isBot: true, chips: 1000, hand: [], folded: false, currentBet: 0, isDealer: true }
+        ];
+      } else {
+        // Reset folded and currentBet; if chips are 0, reset to 1000.
+        players.forEach(player => {
+          if (player.chips <= 0) {
+            player.chips = 1000;
+          }
+          player.folded = false;
+          player.currentBet = 0;
+        });
+      }
+    }
+    
+    // Update display of community cards and players
+    function updateDisplay() {
+      document.getElementById('pot-info').textContent = "Pot: " + pot;
+      document.getElementById('bet-info').textContent = "Current Bet: " + currentBet;
+      document.getElementById('community-stage').textContent = "Community Cards:";
+      
+      const communityDiv = document.getElementById('community-cards');
+      communityDiv.innerHTML = "";
+      
+      // Always show five card positions. If fewer have been dealt, use placeholders.
+      for (let i = 0; i < 5; i++) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card' + 
+          (communityCards[i] && (communityCards[i].suit === '♥' || communityCards[i].suit === '♦') ? ' red' : '');
+        cardDiv.textContent = communityCards[i] ? (communityCards[i].rank + communityCards[i].suit) : '🂠';
+        communityDiv.appendChild(cardDiv);
+      }
+      
+      const playersDiv = document.getElementById('players-area');
+      playersDiv.innerHTML = "";
+      players.forEach((player) => {
+        const pDiv = document.createElement('div');
+        pDiv.className = 'player';
+        pDiv.innerHTML = `<strong>${player.name}${player.isDealer ? " (Dealer)" : ""}</strong> - Chips: ${player.chips} ${player.folded ? "(Folded)" : ""}`;
+        
+        // Show player's cards if not a bot or if at showdown.
+        if (!player.isBot || stage === 'showdown') {
+          player.hand.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card' + ((card.suit === '♥' || card.suit === '♦') ? ' red' : '');
+            cardDiv.textContent = card.rank + card.suit;
+            pDiv.appendChild(cardDiv);
+          });
+        } else {
+          pDiv.innerHTML += `<div class="bot-hand">[Hidden]</div>`;
+        }
+        playersDiv.appendChild(pDiv);
+      });
+      
+      document.getElementById('turn-info').textContent = "Player Turn: " + players[currentPlayerIndex].name;
+      updateNewGameButtonVisibility();
+    }
+    
+    // Update visibility of New Game button.
+    function updateNewGameButtonVisibility() {
+      const btn = document.getElementById('new-game-btn');
+      // Show new game button only if no betting round is active (game over)
+      btn.style.display = bettingRoundActive ? "none" : "inline-block";
+    }
+    
+    // Bot decision logic – adjusted for less folding preflop/flop and more action later.
+    function botDecision(bot) {
+      if (stage === 'flop') {
+        // On the flop, be less likely to fold.
+        let card1 = getCardValue(bot.hand[0]);
+        let card2 = getCardValue(bot.hand[1]);
+        if (bot.hand[0].rank === bot.hand[1].rank) {
+          return 'raise';
+        }
+        if (card1 >= 8 && card2 >= 8) return 'call';
+        return Math.random() < 0.7 ? 'call' : 'fold';
+      } else {
+        // In later rounds, evaluate the best hand.
+        let sevenCards = bot.hand.concat(communityCards);
+        let score = bestHand(sevenCards);
+        if (score.rank >= 5) {
+          return Math.random() < 0.7 ? 'raise' : 'call';
+        } else if (score.rank >= 2) {
+          return Math.random() < 0.5 ? 'call' : 'raise';
+        } else {
+          return 'fold';
+        }
+      }
+    }
+    
+    // Start a betting round: each active player gets one action.
+    function startBettingRound() {
+      bettingRoundActive = true;
+      actionsThisRound = 0;
+      currentBet = 0;
+      players.forEach(p => p.currentBet = 0);
+      // Start with the first active player (assumed to be index 0 = You).
+      currentPlayerIndex = 0;
+      updateDisplay();
+      updateActionButtons();
+      if (players[currentPlayerIndex].isBot) {
+        botAction();
+      }
+    }
+    
+    // Call this after each action.
+    function completeAction() {
+      actionsThisRound++;
+      // Check if only one active player remains.
+      let activeCount = players.filter(p => !p.folded).length;
+      if (activeCount === 1) {
+        completeBoard();
+        return;
+      }
+      if (actionsThisRound >= activeCount) {
+        // End of betting round; move to next stage.
+        nextStage();
+      } else {
+        // Find the next active player.
+        do {
+          currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        } while (players[currentPlayerIndex].folded);
+        updateDisplay();
+        updateActionButtons();
+        if (players[currentPlayerIndex].isBot) {
+          botAction();
+        }
+      }
+    }
+    
+    // When only one player remains or the betting round is complete, deal remaining cards and/or show down.
+    function completeBoard() {
+      // Deal remaining cards automatically.
+      if (stage === 'flop') {
+        dealTurn(true);
+        stage = 'turn';
+      }
+      if (stage === 'turn') {
+        dealRiver(true);
+        stage = 'river';
+      }
+      showdown();
+    }
+    
+    // Dealer deals the next community card and starts a new betting round,
+    // or if at the river, ends the game.
+    function nextStage() {
+      actionsThisRound = 0;
+      if (stage === 'flop') {
+        dealTurn(true);
+        stage = 'turn';
+      } else if (stage === 'turn') {
+        dealRiver(true);
+        stage = 'river';
+      } else if (stage === 'river') {
+        showdown();
+        return;
+      }
+      updateDisplay();
+      startBettingRound();
+    }
+    
+    // Update the state of the player's action buttons.
+    function updateActionButtons() {
+      if (!bettingRoundActive) return;
+      if (!players[currentPlayerIndex].isBot) {
+        setActionButtonsEnabled(true);
+      } else {
+        setActionButtonsEnabled(false);
+      }
+    }
+    function setActionButtonsEnabled(enabled) {
+      document.getElementById('fold-btn').disabled = !enabled;
+      document.getElementById('call-btn').disabled = !enabled;
+      document.getElementById('raise-btn').disabled = !enabled;
+    }
+    
+    // Player actions
+    document.getElementById('fold-btn').addEventListener('click', () => {
+      players[currentPlayerIndex].folded = true;
+      completeAction();
+    });
+    document.getElementById('call-btn').addEventListener('click', () => {
+      let player = players[currentPlayerIndex];
+      let callAmount = currentBet - player.currentBet;
+      if (player.chips >= callAmount) {
+        player.chips -= callAmount;
+        player.currentBet = currentBet;
+        pot += callAmount;
+      } else {
+        player.folded = true;
+      }
+      completeAction();
+    });
+    document.getElementById('raise-btn').addEventListener('click', () => {
+      let player = players[currentPlayerIndex];
+      let input = prompt("Enter your raise amount:", "10");
+      let raiseAmount = parseInt(input);
+      if (isNaN(raiseAmount) || raiseAmount <= 0) {
+        alert("Invalid raise amount!");
+        return;
+      }
+      let callAmount = currentBet - player.currentBet;
+      if (player.chips >= (callAmount + raiseAmount)) {
+        player.chips -= (callAmount + raiseAmount);
+        player.currentBet = currentBet + raiseAmount;
+        currentBet += raiseAmount;
+        pot += (callAmount + raiseAmount);
+      } else {
+        alert("Not enough chips to raise that amount!");
+      }
+      completeAction();
+    });
+    
+    // Bot action (automated decision making)
+    function botAction() {
+      setTimeout(() => {
+        let bot = players[currentPlayerIndex];
+        if (bot.folded) {
+          completeAction();
+          return;
+        }
+        let decision = botDecision(bot);
+        if (decision === 'fold') {
+          bot.folded = true;
+          console.log(bot.name + " folds.");
+        } else if (decision === 'raise') {
+          let raiseAmount = 10;
+          let callAmount = currentBet - bot.currentBet;
+          if (bot.chips >= (callAmount + raiseAmount)) {
+            bot.chips -= (callAmount + raiseAmount);
+            bot.currentBet = currentBet + raiseAmount;
+            currentBet += raiseAmount;
+            pot += (callAmount + raiseAmount);
+            console.log(bot.name + " raises by " + raiseAmount + ".");
+          } else {
+            let callAmount = currentBet - bot.currentBet;
+            bot.chips -= callAmount;
+            bot.currentBet = currentBet;
+            pot += callAmount;
+            console.log(bot.name + " calls (insufficient chips for raise).");
+          }
+        } else { // call
+          let callAmount = currentBet - bot.currentBet;
+          if (bot.chips >= callAmount) {
+            bot.chips -= callAmount;
+            bot.currentBet = currentBet;
+            pot += callAmount;
+            console.log(bot.name + " calls.");
+          } else {
+            bot.folded = true;
+            console.log(bot.name + " folds (insufficient chips).");
+          }
+        }
+        completeAction();
+      }, 1000);
+    }
+    
+    // Deal community cards. The parameter "complete" skips auto-starting a betting round.
+    function dealFlop(complete = false) {
+      stage = 'flop';
+      dealCard(); // Burn card.
+      communityCards.push(dealCard(), dealCard(), dealCard());
+      updateDisplay();
+      if (!complete) startBettingRound();
+    }
+    function dealTurn(complete = false) {
+      // Deal the turn card.
+      dealCard(); // Burn card.
+      communityCards.push(dealCard());
+      updateDisplay();
+      if (!complete) startBettingRound();
+    }
+    function dealRiver(complete = false) {
+      // Deal the river card.
+      dealCard(); // Burn card.
+      communityCards.push(dealCard());
+      updateDisplay();
+      if (!complete) startBettingRound();
+    }
+    
+    // Hand evaluation functions.
+    function getCardValue(card) {
+      if (card.rank === 'A') return 14;
+      if (card.rank === 'K') return 13;
+      if (card.rank === 'Q') return 12;
+      if (card.rank === 'J') return 11;
+      return parseInt(card.rank);
+    }
+    function evaluateFiveCardHand(cards) {
+      let values = cards.map(getCardValue).sort((a, b) => b - a);
+      let suitsCount = {};
+      let rankCount = {};
+      cards.forEach(card => {
+        suitsCount[card.suit] = (suitsCount[card.suit] || 0) + 1;
+        rankCount[getCardValue(card)] = (rankCount[getCardValue(card)] || 0) + 1;
+      });
+      let isFlush = Object.values(suitsCount).some(count => count === 5);
+      let isStraight = false;
+      let sorted = [...new Set(values)].sort((a, b) => a - b);
+      if (sorted.length >= 5) {
+        for (let i = 0; i <= sorted.length - 5; i++) {
+          if (sorted[i+4] - sorted[i] === 4) {
+            isStraight = true;
+            break;
+          }
+        }
+        if (JSON.stringify(sorted) === JSON.stringify([2,3,4,5,14])){
+          isStraight = true;
+          values = [5,4,3,2,1];
+        }
+      }
+      let counts = Object.values(rankCount).sort((a, b) => b - a);
+      if (isStraight && isFlush) {
+        return { rank: 9, tiebreaker: values };
+      }
+      if (counts[0] === 4) {
+        return { rank: 8, tiebreaker: values };
+      }
+      if (counts[0] === 3 && counts[1] === 2) {
+        return { rank: 7, tiebreaker: values };
+      }
+      if (isFlush) {
+        return { rank: 6, tiebreaker: values };
+      }
+      if (isStraight) {
+        return { rank: 5, tiebreaker: values };
+      }
+      if (counts[0] === 3) {
+        return { rank: 4, tiebreaker: values };
+      }
+      if (counts[0] === 2 && counts[1] === 2) {
+        return { rank: 3, tiebreaker: values };
+      }
+      if (counts[0] === 2) {
+        return { rank: 2, tiebreaker: values };
+      }
+      return { rank: 1, tiebreaker: values };
+    }
+    function bestHand(sevenCards) {
+      let best = { rank: 0, tiebreaker: [] };
+      function combinations(arr, k) {
+        let ret = [];
+        for (let i = 0; i < arr.length; i++) {
+          if (k === 1) {
+            ret.push([arr[i]]);
+          } else {
+            let sub = combinations(arr.slice(i+1), k-1);
+            sub.forEach(c => {
+              ret.push([arr[i]].concat(c));
+            });
+          }
+        }
+        return ret;
+      }
+      let comb = combinations(sevenCards, 5);
+      comb.forEach(hand => {
+        let score = evaluateFiveCardHand(hand);
+        if (score.rank > best.rank ||
+           (score.rank === best.rank && JSON.stringify(score.tiebreaker) > JSON.stringify(best.tiebreaker))) {
+          best = score;
+        }
+      });
+      return best;
+    }
+    
+    // Showdown evaluation: compare each active player's best hand.
+    function showdown() {
+      stage = 'showdown';
+      updateDisplay();
+      let activePlayers = players.filter(p => !p.folded);
+      let bestScore = null;
+      let winners = [];
+      activePlayers.forEach(player => {
+        let sevenCards = player.hand.concat(communityCards);
+        let score = bestHand(sevenCards);
+        player.bestHandScore = score;
+        if (!bestScore || score.rank > bestScore.rank ||
+            (score.rank === bestScore.rank && JSON.stringify(score.tiebreaker) > JSON.stringify(bestScore.tiebreaker))) {
+          bestScore = score;
+          winners = [player];
+        } else if (score.rank === bestScore.rank && JSON.stringify(score.tiebreaker) === JSON.stringify(bestScore.tiebreaker)) {
+          winners.push(player);
+        }
+      });
+      
+      let message = "Showdown! ";
+      if (winners.length === 1) {
+        message += winners[0].name + " wins the pot of " + pot + " chips!";
+        winners[0].chips += pot;
+      } else {
+        message += "It's a tie between " + winners.map(p => p.name).join(", ") + ". Pot is split.";
+        let split = Math.floor(pot / winners.length);
+        winners.forEach(p => p.chips += split);
+      }
+      alert(message);
+      bettingRoundActive = false;
+      updateNewGameButtonVisibility();
+      updateDisplay();
+    }
+    
+    // Start a new game.
+    // Keeps players’ chips from previous rounds; resets a player's chips to 1000 if they hit 0.
+    function startGame() {
+      createDeck();
+      shuffleDeck();
+      communityCards = [];
+      pot = 0;
+      currentBet = 0;
+      stage = 'flop';
+      createPlayers();
+      // Deal new hole cards.
+      players.forEach(player => {
+        player.hand = [dealCard(), dealCard()];
+      });
+      bettingRoundActive = true;
+      updateDisplay(); // Show players and empty board.
+      dealFlop(true);  // Immediately deal the flop (3 cards) without starting a betting round.
+      startBettingRound();
+    }
+    
+    document.getElementById('new-game-btn').addEventListener('click', () => {
+      document.getElementById('new-game-btn').disabled = true;
+      startGame();
+    });
+    
+    // Help modal toggling.
+    document.getElementById('help-icon').addEventListener('click', () => {
+      document.getElementById('modal-overlay').style.display = "block";
+      document.getElementById('help-modal').style.display = "block";
+    });
+    document.getElementById('modal-overlay').addEventListener('click', () => {
+      document.getElementById('help-modal').style.display = "none";
+      document.getElementById('modal-overlay').style.display = "none";
+    });
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('help-modal').style.display = "none";
+      document.getElementById('modal-overlay').style.display = "none";
+    });
+  </script>
+</body>
+</html>
